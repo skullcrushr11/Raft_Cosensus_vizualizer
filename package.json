@@ -1,0 +1,12 @@
+{
+  "name": "raft-visualization",
+  "version": "1.0.0",
+  "description": "Raft Consensus Algorithm Visualization",
+  "scripts": {
+    "build": "mvn clean package",
+    "start": "java -jar target/raft-visualization-0.0.1-SNAPSHOT.jar"
+  },
+  "dependencies": {
+    "@vercel/java": "^1.0.0"
+  }
+} 
