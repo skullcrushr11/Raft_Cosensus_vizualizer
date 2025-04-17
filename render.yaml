@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: raft-visualization
+    env: java
+    buildCommand: mvn clean package
+    startCommand: java -jar target/raft-visualization-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: JAVA_VERSION
+        value: 11 

@@ -1,0 +1,1 @@
+web: java -jar target/raft-visualization-0.0.1-SNAPSHOT.jar 
