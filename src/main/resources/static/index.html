@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Raft Consensus Visualization</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .controls {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 0 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #visualization {
+            width: 100%;
+            height: 600px;
+            border: 1px solid #ddd;
+            margin: 20px 0;
+        }
+        .node {
+            fill: #fff;
+            stroke: #000;
+            stroke-width: 2px;
+        }
+        .leader {
+            fill: #ffd700;
+        }
+        .follower {
+            fill: #90ee90;
+        }
+        .candidate {
+            fill: #ffa07a;
+        }
+        .connection {
+            stroke: #000;
+            stroke-width: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Raft Consensus Visualization</h1>
+        <div id="visualization"></div>
+        <div class="controls">
+            <button onclick="addNode()">Add Node</button>
+            <button onclick="removeNode()">Remove Last Node</button>
+            <button onclick="startElection()">Start Election</button>
+            <button onclick="addLogEntry()">Add Log Entry</button>
+            <button onclick="simulatePartition()">Simulate Partition</button>
+            <button onclick="healPartition()">Heal Partition</button>
+        </div>
+    </div>
+
+    <script>
+        let nodes = [];
+        let connections = [];
+        let leaderId = null;
+        let partitionActive = false;
+
+        const svg = d3.select("#visualization")
+            .append("svg")
+            .attr("width", "100%")
+            .attr("height", "100%");
+
+        function addNode() {
+            const newNode = {
+                id: nodes.length,
+                state: 'follower',
+                x: Math.random() * 800,
+                y: Math.random() * 500
+            };
+            nodes.push(newNode);
+            updateVisualization();
+        }
+
+        function removeNode() {
+            if (nodes.length > 0) {
+                nodes.pop();
+                updateVisualization();
+            }
+        }
+
+        function startElection() {
+            if (nodes.length > 0) {
+                const randomNode = nodes[Math.floor(Math.random() * nodes.length)];
+                leaderId = randomNode.id;
+                nodes.forEach(node => {
+                    node.state = node.id === leaderId ? 'leader' : 'follower';
+                });
+                updateVisualization();
+            }
+        }
+
+        function addLogEntry() {
+            if (leaderId !== null) {
+                // Simulate log entry addition
+                updateVisualization();
+            }
+        }
+
+        function simulatePartition() {
+            if (nodes.length >= 3) {
+                partitionActive = true;
+                updateVisualization();
+            }
+        }
+
+        function healPartition() {
+            partitionActive = false;
+            updateVisualization();
+        }
+
+        function updateVisualization() {
+            // Clear existing visualization
+            svg.selectAll("*").remove();
+
+            // Draw connections
+            connections = [];
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    if (!partitionActive || (i < 2 && j < 2) || (i >= 2 && j >= 2)) {
+                        connections.push({ source: i, target: j });
+                    }
+                }
+            }
+
+            // Draw connections
+            svg.selectAll(".connection")
+                .data(connections)
+                .enter()
+                .append("line")
+                .attr("class", "connection")
+                .attr("x1", d => nodes[d.source].x)
+                .attr("y1", d => nodes[d.source].y)
+                .attr("x2", d => nodes[d.target].x)
+                .attr("y2", d => nodes[d.target].y);
+
+            // Draw nodes
+            const nodeGroups = svg.selectAll(".node-group")
+                .data(nodes)
+                .enter()
+                .append("g")
+                .attr("class", "node-group")
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+
+            nodeGroups.append("circle")
+                .attr("class", d => `node ${d.state}`)
+                .attr("r", 20);
+
+            nodeGroups.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dy", ".3em")
+                .text(d => d.id);
+        }
+
+        // Initialize with 3 nodes
+        for (let i = 0; i < 3; i++) {
+            addNode();
+        }
+    </script>
+</body>
+</html> 
